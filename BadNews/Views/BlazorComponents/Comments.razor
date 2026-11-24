@@ -39,7 +39,16 @@
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigationManager.ToAbsoluteUri("/commentsHub"))
+            .WithUrl(navigationManager.ToAbsoluteUri("/commentsHub"), options =>
+            {
+                options.HttpMessageHandlerFactory = handler =>
+                {
+                    if (handler is System.Net.Http.HttpClientHandler httpClientHandler)
+                        httpClientHandler.UseProxy = false;
+
+                    return handler;
+                };
+            })
             .Build();  
         
         hubConnection.On<string, string>("ReceiveComment", (user, message) =>
